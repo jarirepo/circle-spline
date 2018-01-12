@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <base href="/">
+  <title>Circle Spline Generator</title>
+  <link rel="stylesheet" href="./style.css" res="stylesheet" type="text/css">
+</head>
+
+<body>
+  <h1>Circle Spline Generator</h1>
+
+  <div id="controlpanel">
+    <div id="options">
+    <div>
+      <label for="blending-method">Blending Method:
+        <select id="blending-method">
+          <option value="linear">linear</option>
+          <option value="parabolic">parabolic</option>
+          <option value="cubic">cubic</option>
+          <option value="trigonometric" selected>trigonometric</option>
+        </select>
+      </label>      
+    </div>
+    <div>
+      <label for="display-polygon">
+          <input type="checkbox" id="display-polygon" checked>Display Polygon &lt;P&gt;
+      </label>  
+    </div>
+    <div>
+      <label for="display-arcs">
+          <input type="checkbox" id="display-arcs" checked>Display Arcs &lt;A&gt;
+      </label>  
+    </div>
+    <div>
+      <label for="display-tangents">
+        <input type="checkbox" id="display-tangents" checked>Display Tangents &lt;T&gt;
+      </label>  
+    </div>
+    <!--
+    <div>
+      <label for="close-polygon">
+        <input type="checkbox" id="close-polygon">Close Polygon
+      </label>
+    </div>
+    -->
+    </div>
+
+    <div id="controls">
+      <ul>
+        <li>RIGHT MOUSE - Deletes the selected control point</li>
+        <li>DEL, &lt;fn&gt;+&lt;BACKSPACE&gt; - Deletes the last control point</li>
+        <li>Intermediate points can be specified by clicking on a connection line</li>
+      </ul>
+    </div>
+  </div>
+  
+  <canvas id="geometry" width="800" height="500"></canvas>
+  <script src="./js/main.js"></script>
+</body>
+</html>
