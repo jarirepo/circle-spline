@@ -22,21 +22,21 @@ export default class Arc {
   }
 
   _generate() {
+    // generates the two arcs in a single sweep
     const sgn = sign(this.axis.z)
-
-    // 1st arc
-    let arcLen = (2 * this.tau0) * this.radius
+    const arcLen = 2 * (this.tau0 + this.tau1) * this.radius
     let n = arcLen / arcResol + 0.5 | 0
     if (n < 2) {n = 2} else if (n > 200) {n = 200}
 
-    let v = this.p1.clone().sub(this.p0).normalize()
-    let b = this.p0.dist(this.p1)
-    let u, fu, phi, tau = this.tau0
-    let px, py
-    let c, s
+    let v = this.p2.clone().sub(this.p0).normalize()
+    let b = this.p2.dist(this.p0)
+    let tau = this.tau0 + this.tau1
+    
+    let u, fu, phi, px, py, c, s
+    
     this.pts.push(this.p0.clone())
 
-    for (let i = 1; i < n; i++) {
+    for (let i = 1; i <= n; i++) {
       u = i / n
       phi = (1 - u) * tau * sgn
       fu = b * sin(u * tau) / sin(tau)
@@ -46,28 +46,6 @@ export default class Arc {
       py = fu * (c * v.y - s * v.x) + this.p0.y
       this.pts.push(new Vector(px, py))
     }
-    this.pts.push(this.p1.clone())
-
-    // 2nd arc
-    arcLen = (2 * this.tau1) * this.radius
-    n = arcLen / arcResol + 0.5 | 0
-    if (n < 2) {n = 2} else if (n > 200) {n = 200}
-
-    v = this.p2.clone().sub(this.p1).normalize()
-    b = this.p1.dist(this.p2)
-    tau = this.tau1
-
-    for (let i = 1; i < n; i++) {
-      u = i / n
-      phi = (1 - u) * tau * sgn
-      fu = b * sin(u * tau) / sin(tau)
-      c = cos(phi)
-      s = sin(phi)
-      px = fu * (c * v.x + s * v.y) + this.p1.x
-      py = fu * (c * v.y - s * v.x) + this.p1.y
-      this.pts.push(new Vector(px, py))
-    }
-    this.pts.push(this.p2.clone())
   }
 
   render(ctx) {
