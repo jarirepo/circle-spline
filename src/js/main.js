@@ -12,8 +12,7 @@ const options = {
   blendingMethod: 'trigonometric',
   showPolygon: true,
   showTangents: true,
-  showArcs: true,
-  closed: false       // currently not used  
+  showArcs: true
 }
 
 const mouse = new Mouse(canvas)
@@ -25,7 +24,8 @@ poly.add(1 / 4 * canvas.width, 1 / 4 * canvas.height)
 poly.add(3 / 4 * canvas.width, 1 / 4 * canvas.height)
 poly.add(3 / 4 * canvas.width, 3 / 4 * canvas.height)
 poly.add(1 / 2 * canvas.width, 1 / 2 * canvas.height)
-poly.add(1 / 2 * canvas.width, 3 / 4 * canvas.height)
+poly.add(1 / 4 * canvas.width, 3 / 4 * canvas.height)
+// poly.close()
 
 // key bindings
 document.addEventListener('keyup', e => {
@@ -64,11 +64,19 @@ $('#display-arcs')
 $('#display-tangents')
   .prop('checked', options.showTangents)
   .change(e => options.showTangents = e.target.checked)
-/*
 $('#close-polygon')
-  .prop('checked', options.closed)
-  .change(e => options.closed = e.target.checked)
-*/
+  .prop('disabled', poly.count < 3)
+  .prop('checked', poly.closed)
+  .change(e => {
+    poly.close()
+  })
+
+// control polygon event handler  
+poly.on('modified', () => {
+  $('#close-polygon')
+    .prop('checked', poly.closed)
+    .prop('disabled', poly.count < 3)
+})
 
 function draw(time = 0) {
   ctx.fillStyle = '#000'

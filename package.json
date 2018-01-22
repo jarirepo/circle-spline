@@ -1,6 +1,6 @@
 {
   "name": "circle-spline",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Circle spline generator",
   "scripts": {
     "dev": "parcel src/index.html -p 3000",

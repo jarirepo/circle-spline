@@ -1,8 +1,6 @@
 # circle-spline
 Interactive circle spline generator based on [this][cspline] publication.
 
-<img src="screenshots/circle-spline-001.png" alt="Circle Spline Generator">
-
 Features:
 - linear, parabolic, cubic, trigonometric weighting functions
 - add new control points at the end
@@ -10,6 +8,12 @@ Features:
 - removal of a control point by right-clicking on it
 - positioning of a control point by dragging
 - toggle the visibility of the polygon, tangents and arcs
+- closable control polygon to generate a cyclic / periodic Circle Spline
+
+<img src="screenshots/circle-spline-001.png" alt="Circle Spline Generator">
+
+Example of a periodic Circle Spline:
+<img src="screenshots/circle-spline-002.png" alt="Circle Spline Generator">
 
 # Running the program
 First, install [Parcel][parcel-bundler] bundler:

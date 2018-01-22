@@ -3,6 +3,8 @@ import Vector from './vector'
 const { acos, cos, PI, pow, sign, sin } = Math
 const R2D = 180 / PI
 const arcResol = 5
+const minSegm = 3
+const maxSegm = 99
 
 export default class Arc {  
   constructor(p0, p1, p2, t0, t1, t2, tau0, tau1, radius, phi, axis) {
@@ -26,7 +28,7 @@ export default class Arc {
     const sgn = sign(this.axis.z)
     const arcLen = 2 * (this.tau0 + this.tau1) * this.radius
     let n = arcLen / arcResol + 0.5 | 0
-    if (n < 2) {n = 2} else if (n > 200) {n = 200}
+    if (n < minSegm) {n = minSegm} else if (n > maxSegm) {n = maxSegm}
 
     let v = this.p2.clone().sub(this.p0).normalize()
     let b = this.p2.dist(this.p0)

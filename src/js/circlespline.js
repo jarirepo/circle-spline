@@ -2,8 +2,9 @@ import Vector from "./vector"
 import Arc from './arc'
 import weightfcn from "./weightfcn";
 
-const { acos, cos, PI, pow, sign, sin } = Math
+const { abs, acos, cos, PI, pow, sign, sin } = Math
 const R2D = 180 / PI
+const  vectorLen = 100
 
 export default class CircleSpline {
   constructor(poly, options = {}) {
@@ -30,15 +31,14 @@ export default class CircleSpline {
     }
 
     let q = this._poly._start
-    const len = 100
 
-    while (q) {
+    for (let i = 0; i < this._poly.count; i++) {
       if (this.options.showTangents && q.t) {
         ctx.beginPath()
         ctx.strokeStyle = 'rgba(50,200,50,0.8)'
         ctx.lineWidth = 2    
-        ctx.moveTo(q.v.x - len / 2 * q.t.x, q.v.y - len / 2 * q.t.y)
-        ctx.lineTo(q.v.x + len / 2 * q.t.x, q.v.y + len / 2 * q.t.y)
+        ctx.moveTo(q.v.x - vectorLen / 2 * q.t.x, q.v.y - vectorLen / 2 * q.t.y)
+        ctx.lineTo(q.v.x + vectorLen / 2 * q.t.x, q.v.y + vectorLen / 2 * q.t.y)
         ctx.stroke()            
       }
       q.render(ctx)
@@ -68,15 +68,16 @@ export default class CircleSpline {
   }
   
   _getTangents() {    
-    const n = this._poly.count
-    if (n < 3) { return }
+    if (this._poly.count < 3) { return }
 
     // process 3 consecutive points
     let q0 = this._poly._start
     let q1 = q0._next
     let q2 = q1._next
 
-    while (q2) {
+    for (let i = 0; i < this._poly.count; i++) {
+      if (!(q1 && q2)) { continue }
+
       const a = q1.v.clone().sub(q0.v)
       const b = q2.v.clone().sub(q1.v)
       const c = q2.v.clone().sub(q0.v)
@@ -112,9 +113,12 @@ export default class CircleSpline {
       if (q0 === this._poly._start) {
         q0.t = t0
         q1.t = t1
+        // q2.t = t2
       } else {
         q1.t = t1
-        q2.t = t2
+        if (!this._poly.closed || (this._poly.closed && i < this._poly.count - 1)) {
+          q2.t = t2
+        }
       }
 
       q0 = q1
@@ -129,17 +133,97 @@ export default class CircleSpline {
 
     // precalculate the selected weighting function for the blending operations
     // (n should be provided via options)
-    const n = 40
+    const n = 99
     const weights = weightfcn(this.options.blendingMethod, n)
 
     let arc1 = this.arcs[0]
     let arc2 = arc1
 
     // generate the starting arc
-    const arcResol = 5
-    this._generateArc(arc1.p0, arc1.p1, arc1.radius, arc1.tau0, sign(arc1.axis.z), arcResol)
+    if (!this._poly.closed) {      
+      this._generateArc(arc1.p0, arc1.p1, arc1.radius, arc1.tau0, sign(arc1.axis.z))
+    }
+
+    let tau0, tau1,
+        t0, t1,
+        p0, p1
+
+    let q0 = this._poly._start,
+        q1 = q0._next
 
     // generate the blending curves
+    loop: for (let i = 0; i < this.arcs.length; i++) {
+      
+      if (!this._poly.closed) {
+        if (i === this.arcs.length - 1) { continue loop }
+        arc1 = this.arcs[i]
+        arc2 = this.arcs[i + 1]
+        tau0 = arc1.tau1
+        tau1 = arc2.tau0
+        t0 = arc1.t1
+        t1 = arc2.t0
+        /*p0 = q0.v
+        p1 = q1.v
+        t0 = q0.t
+        t1 = q1.t*/
+        //t0 = q0.t
+        //t1 = q1.t
+      } else {
+        if (i > 0) {
+          arc1 = this.arcs[i - 1]
+        } else {
+          arc1 = this.arcs[this.arcs.length - 1]
+        }
+        arc2 = this.arcs[i]
+        tau0 = arc1.tau1
+        tau1 = arc2.tau1
+        t0 = q0.t
+        t1 = q1.t
+        // p0 = q0.v
+        // p1 = q1.v
+      }
+      p0 = arc1.p1
+      p1 = arc2.p1
+
+      const v = p1.clone().sub(p0)
+      const b = v.mag()
+      v.normalize()
+
+      // Fix!
+      if (this._poly.closed) {
+        t1 = t1.clone().mirror(v)
+      }
+
+      const axis = t0.cross(t1)
+      const sgn = sign(axis.z)
+      let cosa = t0.dot(t1)
+      cosa = (cosa < -1)? -1 : (cosa > 1)? 1 : cosa
+      const ang = acos(cosa)
+      
+      weights.map((w, j) => t0.clone().rotateZ(sgn * w * ang))
+      .map(t => {
+        const w = v.cross(t).normalize()
+        let cosa = t.dot(v)
+        cosa = (cosa < -1)? -1: (cosa > 1)? 1: cosa
+        return acos(cosa) * sign(w.z)
+      })
+      .map((tau, j) => {
+        const u = j / (n - 1)
+        const phi = (1 - u) * tau
+        const c = cos(phi)
+        const s = sin(phi)
+        const fu = b * sin(u * tau) / sin(tau)
+        const xu = fu * (v.x * c - v.y * s) + p0.x
+        const yu = fu * (v.x * s + v.y * c) + p0.y
+        return new Vector(xu, yu)
+      })
+      .forEach(p => this.pts.push(p))
+
+      q0 = q1
+      q1 = q1._next
+    }
+
+    /*
     for (let i = 1; i < this.arcs.length; i++) {
       arc2 = this.arcs[i]
 
@@ -181,15 +265,18 @@ export default class CircleSpline {
 
       arc1 = arc2
     }
+    */
 
     // generate the ending arc
-    this._generateArc(arc2.p1, arc2.p2, arc2.radius, arc2.tau1, sign(arc2.axis.z), arcResol)
+    if (!this._poly.closed) {
+      this._generateArc(arc2.p1, arc2.p2, arc2.radius, arc2.tau1, sign(arc2.axis.z))
+    }
   }
 
-  _generateArc(p0, p1, radius, tau, sgn, resol) {
+  _generateArc(p0, p1, radius, tau, sgn) {
+    const arcResol = 5
     const arcLen = (2 * tau) * radius
-    
-    let n = arcLen / resol + 0.5 | 0
+    let n = arcLen / arcResol + 0.5 | 0
     if (n < 3) {
       n = 3
     } else if (n > 100) {
@@ -208,9 +295,9 @@ export default class CircleSpline {
       fu = b * sin(u * tau) / sin(tau)
       c = cos(phi)
       s = sin(phi)
-      x = fu * (c * v.x + s * v.y) + p0.x
-      y = fu * (c * v.y - s * v.x) + p0.y
+      x = fu * (v.x * c + v.y * s) + p0.x
+      y = fu * (v.y * c - v.x * s) + p0.y
       this.pts.push(new Vector(x, y))
     }
-  }  
+  }
 }
