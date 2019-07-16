@@ -1,6 +1,6 @@
-import Vector from "./vector"
+import Vector from './vector'
 import Arc from './arc'
-import weightfcn from "./weightfcn";
+import weightfcn from './weightfcn'
 
 const { abs, acos, cos, PI, pow, sign, sin } = Math
 const R2D = 180 / PI

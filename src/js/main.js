@@ -2,7 +2,7 @@ import $ from 'jquery'
 import Vector from './vector'
 import ControlPolygon from './control-polygon'
 import Mouse from './mouse'
-import CircleSpline from './circlespline';
+import CircleSpline from './circlespline'
 
 const canvas = document.getElementById('geometry')
 const ctx = canvas.getContext('2d')

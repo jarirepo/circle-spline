@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
-import ControlPoint from "./control-point"
-import Vector from "./vector"
+import ControlPoint from './control-point'
+import Vector from './vector'
 
 const { pow, sqrt } = Math
 const DTOL = 5

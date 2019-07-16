@@ -1,4 +1,4 @@
-import Vector from "./vector";
+import Vector from './vector'
 
 const { PI, pow } = Math
 const TWO_PI = 2 * PI

@@ -1,5 +1,5 @@
 # circle-spline
-Interactive circle spline generator based on [this][cspline] publication.
+Interactive Circle Spline generator based on [this][cspline] publication.
 
 Features:
 - linear, parabolic, cubic, trigonometric weighting functions
